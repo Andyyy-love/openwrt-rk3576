@@ -1,3 +1,105 @@
+## armv8.mk修改
+```
+路径  /work/rockchip/hejh/openwrt-rk3576/target/linux/rockchip/image/armv8.mk
+
+define Device/radxa_rock-4d
+  $(Device/rk3576)
+  DEVICE_VENDOR := Radxa
+  DEVICE_MODEL := ROCK 4D
+endef
+TARGET_DEVICES += radxa_rock-4d
+
+define Device/igkboard_rk3576
+  $(Device/rk3576)
+  DEVICE_VENDOR := LingYun
+  DEVICE_MODEL := IGKBoard RK3576
+  DEVICE_DTS := igkboard-rk3576
+  UBOOT_DEVICE_NAME := rock-4d-rk3576
+  DEVICE_PACKAGES := kmod-r8169
+endef
+TARGET_DEVICES += igkboard_rk3576
+
+define Device/radxa_rock-4se
+  $(Device/rk3399)
+  DEVICE_VENDOR := Radxa
+  DEVICE_MODEL := ROCK 4SE
+endef
+TARGET_DEVICES += radxa_rock-4se
+```
+## uboot设备树位置
+```
+/work/rockchip/hejh/openwrt-rk3576/build_dir/target-aarch64_generic_musl/u-boot-rock-4d-rk3576/u-boot-2026.01/dts/upstream/src/arm64/rockchip/rk3576-rock-4d.dts
+```
+## uboot生成位置
+```
+rockchip@ubuntu22:/work/rockchip/hejh/openwrt-rk3576$ find staging_dir -name "rock-4d-rk3576-u-boot-rockchip.bin" -ls
+ 82748978   9216 -rw-r--r--   1 rockchip rockchip  9434112 5月  9 11:36 staging_dir/target-aarch64_generic_musl/image/rock-4d-rk3576-u-boot-rockchip.bin
+rockchip@ubuntu22:/work/rockchip/hejh/openwrt-rk3576$ find staging_dir build_dir -name "*rock-4d-rk3576*u-boot-rockchip.bin" -ls
+ 82748978   9216 -rw-r--r--   1 rockchip rockchip  94
+```
+## uboot编译
+### 查看uboot编译时间
+```
+ls -lh build_dir/target-aarch64_generic_musl/u-boot-rock-4d-rk3576/u-boot-2026.01/u-boot-rockchip.bin
+ls -lh build_dir/target-aarch64_generic_musl/u-boot-rock-4d-rk3576/u-boot-2026.01/idbloader.img
+ls -lh build_dir/target-aarch64_generic_musl/u-boot-rock-4d-rk3576/u-boot-2026.01/u-boot.itb
+```
+### 只重新编译uboot
+```
+make defconfig选择rock 4D编译uboot
+
+make package/boot/uboot-rockchip/clean V=s
+make package/boot/uboot-rockchip/compile V=s
+
+检查生成时间
+ls -lh build_dir/target-aarch64_generic_musl/u-boot-rock-4d-rk3576/u-boot-2026.01/u-boot-rockchip.bin
+ls -lh build_dir/target-aarch64_generic_musl/u-boot-rock-4d-rk3576/u-boot-2026.01/idbloader.img
+ls -lh build_dir/target-aarch64_generic_musl/u-boot-rock-4d-rk3576/u-boot-2026.01/u-boot.itb
+
+同时检查最终staging文件
+ls -lh staging_dir/target-aarch64_generic_musl/image/rock-4d-rk3576-u-boot-rockchip.bin
+
+只编译 U-Boot 不一定会重新打包最终 .img，所以还要执行：
+make -j$(nproc) V=s
+
+然后看最终镜像时间：
+ls -lh bin/targets/rockchip/armv8/
+```
+## 内核设备树位置
+```
+/work/rockchip/hejh/openwrt-rk3576/build_dir/target-aarch64_generic_musl/linux-rockchip_armv8/linux-6.12.85/arch/arm64/boot/dts/rockchip/rk3576-rock-4d.dts
+```
+
+## 重新生成 rootfs 和镜像
+```
+rm -f staging_dir/target-aarch64_generic_musl/stamp/.*target*
+
+make -j$(nproc) V=s
+这个会重新生成：
+build_dir/target-aarch64_generic_musl/root-rockchip/
+
+eg：
+rockchip@ubuntu22:/work/rockchip/hejh/openwrt-rk3576$ ls build_dir/target-aarch64_generic_musl/root-rockchip/
+bin  dev  etc  lib  lib64  mnt  overlay  proc  rom  root  sbin  sys  tmp  usr  var  www
+rockchip@ubuntu22:/work/rockchip/hejh/openwrt-rk3576$ ls build_dir/target-aarch64_generic_musl/root-rockchip/lib/firmware/brcm/
+brcmfmac43143.bin  brcmfmac43236b.bin  brcmfmac43456-sdio.bin  brcmfmac43456-sdio.clm_blob  brcmfmac43456-sdio.txt
+rockchip@ubuntu22:/work/rockchip/hejh/openwrt-rk3576$ 
+
+以及最终镜像：
+bin/targets/rockchip/armv8/*.img
+bin/targets/rockchip/armv8/*.img.gz
+
+```
+## 一些bug
+U-Boot 时间不变是正常的，不是旧 U-Boot 没更新。
+```
+rockchip@ubuntu22:/work/rockchip/hejh/openwrt-rk3576$ date -u -d @$(./scripts/get_source_date_epoch.sh)
+2026年 05月 08日 星期五 09:31:34 UTC
+rockchip@ubuntu22:/work/rockchip/hejh/openwrt-rk3576$ strings staging_dir/target-aarch64_generic_musl/image/rock-4d-rk3576-u-boot-rockchip.bin | grep "U-Boot 2026"
+U-Boot 2026.01-OpenWrt-r34345-8b393f99fd (May 08 2026 - 09:31:34 +0000)
+rockchip@ubuntu22:/work/rockchip/hejh/openwrt-rk3576$
+
+```
 ![OpenWrt logo](include/logo.png)
 
 OpenWrt Project is a Linux operating system targeting embedded devices. Instead

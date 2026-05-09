@@ -344,6 +344,16 @@ define Device/radxa_rock-4d
 endef
 TARGET_DEVICES += radxa_rock-4d
 
+define Device/igkboard_rk3576
+  $(Device/rk3576)
+  DEVICE_VENDOR := LingYun
+  DEVICE_MODEL := IGKBoard RK3576
+  DEVICE_DTS := igkboard-rk3576
+  UBOOT_DEVICE_NAME := rock-4d-rk3576
+  DEVICE_PACKAGES := kmod-r8169
+endef
+TARGET_DEVICES += igkboard_rk3576
+
 define Device/radxa_rock-4se
   $(Device/rk3399)
   DEVICE_VENDOR := Radxa
