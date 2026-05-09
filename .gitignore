@@ -13,7 +13,11 @@
 /logs
 /feeds
 /feeds.conf
-/files
+/files/*
+!/files/lib/
+!/files/lib/firmware/
+!/files/lib/firmware/brcm/
+!/files/lib/firmware/brcm/*
 /target/linux/feeds
 /overlay
 /package/feeds
