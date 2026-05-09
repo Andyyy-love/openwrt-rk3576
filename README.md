@@ -100,6 +100,29 @@ U-Boot 2026.01-OpenWrt-r34345-8b393f99fd (May 08 2026 - 09:31:34 +0000)
 rockchip@ubuntu22:/work/rockchip/hejh/openwrt-rk3576$
 
 ```
+## 测试内核设备树补丁能不能自动打进去
+```
+先清内核：
+
+make target/linux/clean V=s
+
+然后只准备内核源码和补丁：
+
+make target/linux/prepare V=s
+
+如果没有报：
+
+Patch failed
+
+说明补丁能正常打进去。
+
+然后确认文件重新出现：
+
+ls build_dir/target-aarch64_generic_musl/linux-rockchip_armv8/linux-6.12.85/arch/arm64/boot/dts/rockchip/rk3576-rk806.dtsi
+
+ls build_dir/target-aarch64_generic_musl/linux-rockchip_armv8/linux-6.12.85/arch/arm64/boot/dts/rockchip/igkboard-rk3576.dts
+```
+
 ![OpenWrt logo](include/logo.png)
 
 OpenWrt Project is a Linux operating system targeting embedded devices. Instead
